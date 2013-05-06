@@ -1,0 +1,61 @@
+body {
+	background: #fbfbfb;
+	padding-top: 60px;
+	padding-bottom: 40px;
+}
+.sidebar-nav {
+	padding: 9px 0;
+}
+
+@media (max-width: 980px) {
+	/* Enable use of floated navbar text */
+	.navbar-text.pull-right {
+		float: none;
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+}
+
+#stage {
+	background: #fff;
+	height: 600px;
+	border: 1px solid #d7d7d7;
+}
+
+
+/*
+ *	Demo styles
+ */
+
+.node {
+	cursor: pointer;
+	/*cursor: -webkit-grab;
+	 cursor: -webkit-grabbing; */
+}
+
+.node_selected circle {
+  fill: #ff7f0e;
+  stroke: #ff7f0e;
+}
+
+.drag_line {
+  stroke: #999;
+  stroke-width: 5;
+  pointer-events: none;
+}
+
+.drag_line_hidden {
+  stroke: #999;
+  stroke-width: 0;
+  pointer-events: none;
+}
+
+.link {
+  stroke: #999;
+  stroke-width: 5;
+  cursor: crosshair;
+}
+
+.link_selected {
+  stroke: #ff7f0e;
+}
