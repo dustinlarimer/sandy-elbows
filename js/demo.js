@@ -4,16 +4,16 @@ var user_data = {
 };
 
 /*
-default_canvas_settings = {};
-default_object_library  = {};
-user_composition_data   = {};
-user_canvas_settings    = {};
-user_theme_settings     = {};
-var stage = {
-	fill   : d3.scale.category20(),
-	height : 600,
-	width  : 1118
-}
+	default_canvas_settings = {};
+	default_object_library  = {};
+	user_composition_data   = {};
+	user_canvas_settings    = {};
+	user_theme_settings     = {};
+	var stage = {
+		fill   : d3.scale.category20(),
+		height : 600,
+		width  : 1118
+	}
 */
 
 var stage_width  = 1118,
@@ -40,8 +40,7 @@ var vis = outer
   .append('svg:g')
     .on("mousemove", mousemove)
     .on("mousedown", mousedown)
-    .on("mouseup", mouseup)
-		.on("click", click);
+    .on("mouseup", mouseup);
 
 vis.append("svg:rect")
 		.attr("fill", stage_fill)
@@ -69,7 +68,7 @@ var node_drag = d3.behavior.drag()
 	.on("dragend", dragend);
 
 function dragstart(d, i) {
-	//force.stop() // stops the force auto positioning before you start dragging
+	force.stop();
 }
 
 function dragmove(d, i) {
@@ -78,17 +77,16 @@ function dragmove(d, i) {
 	d.x  += d3.event.dx;
 	d.y  += d3.event.dy;
 	force.tick();
-	//tick(); // this is the key to make it work together with updating both px,py,x,y on d !
 }
 
 function dragend(d, i) {
-	d.fixed = true; // of course set the node to fixed so the force doesn't include the node in its auto positioning stuff
+	d.fixed = true;
 	force.tick();
 	force.resume();
 }
 
 function mousedown() {
-	if (!mousedown_node && !mousedown_link) {
+	if (!mousedown_node) { // && !mousedown_link
     // allow panning if nothing is selected
 		vis.call(d3.behavior.zoom().on("zoom", rescale));
     return;
@@ -98,19 +96,9 @@ function mousemove() {
   if (!mousedown_node) return;
 }
 function mouseup() {
-  if (!mousedown_node) {
-    if (!mouseup_node) {
-      // add node
-			
-    }
-  }
-  // clear mouse event vars
-  resetMouseVars();
-}
-function click() {
-	if (!mousedown_node) {
-		var spot = d3.mouse(this),
-  		node = {
+  if (!mousedown_node && !mouseup_node) {
+   	var spot = d3.mouse(this),
+ 		node = {
 				x : spot[0], 
 				y : spot[1], 
 				px: spot[0],
@@ -122,7 +110,9 @@ function click() {
 			};
 		user_data.nodes.push(node);
 		draw();
-	}
+  }
+  // clear mouse event vars
+  resetMouseVars();
 }
 
 function resetMouseVars() {
@@ -138,7 +128,20 @@ function rescale() {
 }
 
 function keydown() {
-	console.log('Key#: ' + d3.event.keyCode)
+	console.log('Key#: ' + d3.event.keyCode);
+	if (!selected_node) return;
+	switch (d3.event.keyCode) {
+    case 8: 		// backspace
+    case 46: { 	// delete
+			console.log(nodes);
+      if (selected_node) {
+        nodes.splice(nodes.indexOf(selected_node), 1);
+      }
+      selected_node = null;
+      draw();
+      break;
+    }
+  }
 }
 
 
@@ -169,28 +172,36 @@ function draw() {
 	   	.transition()
 	     	.ease(Math.sqrt)
 	node
-			/*.on("click", function(d){
+			/*
+			.on("click", function(d){
 				selected_node = d;
-			})*/
+				draw();
+			})
 			.on("drag", function(d,i) {
 				d.x += d3.event.dx;
 				d.y += d3.event.dy;
 				d3.select(this)
-					.attr('cx', function(d){ return d.x; })
-					.attr('cy', function(d){ return d.y; });
-			})
+					//.attr('cx', function(d){ return d.x; })
+					//.attr('cy', function(d){ return d.y; });
+			})*/
 			.on("mousedown", function(d) { 
 				vis.call(d3.behavior.zoom().on("zoom", null));
 				mousedown_node = d;
-				console.log(mousedown_node);
-				if (mousedown_node == selected_node) selected_node = null;
-				else selected_node = mousedown_node; 
-				selected_link = null;
+				if (mousedown_node == selected_node) {
+					selected_node = null;
+				} else {
+					selected_node = mousedown_node;
+				}
+				draw();
 			})
 			.on("mouseup", function(d) { 
 				if (mousedown_node) {
 					mouseup_node = d; 
-					if (mouseup_node == mousedown_node) { resetMouseVars(); return; }
+					if (mouseup_node == mousedown_node) { 
+						selected_node = mousedown_node;
+						//draw();
+						/*resetMouseVars(); return;*/
+					}
 					vis.call(d3.behavior.zoom().on("zoom", rescale));
 					draw();
 				} 

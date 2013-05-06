@@ -33,7 +33,7 @@ body {
 	 cursor: -webkit-grabbing; */
 }
 
-.node_selected circle {
+.node_selected {
   fill: #ff7f0e;
   stroke: #ff7f0e;
 }
