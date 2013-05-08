@@ -16,7 +16,7 @@ var user_data = {
 	}
 */
 
-var stage_width  = 1118,
+var stage_width  = 900,
     stage_height = 600,
     stage_fill   = '#fff';
 
@@ -26,6 +26,7 @@ var selected_node = null,
     mousedown_link = null,
     mousedown_node = null,
     mouseup_node = null;
+		keydown_code = null;
 
 var outer = d3.select("#stage")
 	.append("svg:svg")
@@ -35,7 +36,7 @@ var outer = d3.select("#stage")
 
 var vis = outer
   .append('svg:g')
-    .call(d3.behavior.zoom().on("zoom", rescale))
+    //.call(d3.behavior.zoom().on("zoom", rescale))
     .on("dblclick.zoom", null)
   .append('svg:g')
     .on("mousemove", mousemove)
@@ -45,10 +46,12 @@ var vis = outer
 vis.append("svg:rect")
 		.attr("fill", stage_fill)
     .attr("height", stage_height)
-		.attr("width", stage_width);
+		.attr("width", stage_width)
+		.attr('x', 10)
+		.attr('y', 50);
 
 var force = d3.layout.force()
-	.charge(0)
+	.charge(0) // -10
 	.gravity(0)
 	.nodes(user_data.nodes)
 	.links(user_data.links)
@@ -69,6 +72,7 @@ var node_drag = d3.behavior.drag()
 
 function dragstart(d, i) {
 	force.stop();
+	if (mousedown_node) mousedown_node = null;
 }
 
 function dragmove(d, i) {
@@ -80,23 +84,24 @@ function dragmove(d, i) {
 }
 
 function dragend(d, i) {
-	d.fixed = true;
+	//d.fixed = true;
 	force.tick();
 	force.resume();
 }
 
 function mousedown() {
 	if (!mousedown_node) { // && !mousedown_link
-    // allow panning if nothing is selected
-		vis.call(d3.behavior.zoom().on("zoom", rescale));
+		selected_node = null;
+		//vis.call(d3.behavior.zoom().on("zoom", rescale));
+		draw();
     return;
   }
 }
 function mousemove() {
-  if (!mousedown_node) return;
+  // if (!mousedown_node) return;
 }
 function mouseup() {
-  if (!mousedown_node && !mouseup_node) {
+  if (!mouseup_node) {
    	var spot = d3.mouse(this),
  		node = {
 				x : spot[0], 
@@ -104,14 +109,13 @@ function mouseup() {
 				px: spot[0],
 				py: spot[1]+1,
 				r : 45,
-				f : '#E5E5E5',
-				s : '#FFFFFF',
+				f : '#FBFBFB',
+				s : '#E5E5E5',
 				sw: 3
 			};
 		user_data.nodes.push(node);
 		draw();
   }
-  // clear mouse event vars
   resetMouseVars();
 }
 
@@ -128,31 +132,19 @@ function rescale() {
 }
 
 function keydown() {
-	console.log('Key#: ' + d3.event.keyCode);
-	if (!selected_node) return;
-	switch (d3.event.keyCode) {
-    case 8: 		// backspace
-    case 46: { 	// delete
-			console.log(nodes);
-      if (selected_node) {
-        nodes.splice(nodes.indexOf(selected_node), 1);
-      }
-      selected_node = null;
+	//keydown_code = d3.event.keyCode;
+	switch(d3.event.keyCode) {
+		case 8:
+		case 46: {
+			if (selected_node) nodes.splice(nodes.indexOf(selected_node), 1);
+			selected_node = null;
       draw();
       break;
-    }
-  }
+		}
+	}
 }
 
-
-force.on("tick", function() {
-	stage_height = $('#stage').height();
-	stage_width = $('#stage').width();
-	$("#stage svg")
-		.attr('height', stage_height)
-		.attr('width', stage_width);
-	force.size([stage_width, stage_height]);
-	
+force.on("tick", function() {	
   vis.selectAll("circle")
 		.attr("cx", function(d) { return d.x; })
 		.attr("cy", function(d) { return d.y; });
@@ -172,26 +164,9 @@ function draw() {
 	   	.transition()
 	     	.ease(Math.sqrt)
 	node
-			/*
-			.on("click", function(d){
-				selected_node = d;
-				draw();
-			})
-			.on("drag", function(d,i) {
-				d.x += d3.event.dx;
-				d.y += d3.event.dy;
-				d3.select(this)
-					//.attr('cx', function(d){ return d.x; })
-					//.attr('cy', function(d){ return d.y; });
-			})*/
 			.on("mousedown", function(d) { 
 				vis.call(d3.behavior.zoom().on("zoom", null));
 				mousedown_node = d;
-				if (mousedown_node == selected_node) {
-					selected_node = null;
-				} else {
-					selected_node = mousedown_node;
-				}
 				draw();
 			})
 			.on("mouseup", function(d) { 
@@ -199,16 +174,15 @@ function draw() {
 					mouseup_node = d; 
 					if (mouseup_node == mousedown_node) { 
 						selected_node = mousedown_node;
-						//draw();
-						/*resetMouseVars(); return;*/
 					}
-					vis.call(d3.behavior.zoom().on("zoom", rescale));
+					//vis.call(d3.behavior.zoom().on("zoom", rescale));
 					draw();
 				} 
       })
 			.classed("node_selected", function(d) { return d === selected_node; })
 			.exit()
 			.transition()
+			.attr("stroke", "")
     	.attr("r", 0)
     	.remove();
 	
@@ -222,7 +196,6 @@ draw();
 
 
 $(function(){
-	/*
 	function adjust(){
 		setTimeout(function() {
 			var stage_height = $('#stage').height();
@@ -230,11 +203,14 @@ $(function(){
 			$("#stage svg")
 				.attr('height', stage_height)
 				.attr('width', stage_width);
+			$("#stage svg rect")
+				.attr('height', stage_height-60)
+				.attr('width', stage_width-20)
 			force
 				.size([stage_width, stage_height])
 				.start();
 		}, 250);
 	}
 	adjust();
-	$(window).resize(function() { adjust() });*/
+	$(window).resize(function() { adjust() });
 });

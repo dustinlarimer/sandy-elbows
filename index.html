@@ -26,37 +26,17 @@
 
   <body>
 
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container-fluid">
-          <a class="brand" href="#">Demo</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="container-fluid">
-      <div class="row-fluid">
-        <div class="span1">
-          <div class="well sidebar-nav">
-            <ul class="nav nav-list">
-              <li class="nav-header">Tools</li>
-              <li class="active"><a href="#">Link</a></li>
-              <li><a href="#">Link</a></li>
-            </ul>
-          </div><!--/.well -->
-        </div><!--/span-->
-        <div class="span11">
-					<div id="stage"></div>
-        </div><!--/span-->
-      </div><!--/row-->
-
-      <hr>
-
-      <footer>
-        <p>&copy; 2013</p>
-      </footer>
-
-    </div><!--/.fluid-container-->
+    <div id="editor">
+			<div id="controls">
+				<div class="btn-group" data-toggle="buttons-radio">
+					<button type="button" class="btn btn-warning">Pointer</button>
+					<button type="button" class="btn btn-warning">Circle</button>
+					<button type="button" class="btn btn-warning">Link</button>
+					<button type="button" class="btn btn-warning">Text</button>
+				</div>
+			</div>
+			<div id="stage"></div>
+    </div><!--/ #editor -->
 
     <!-- Le javascript
     ================================================== -->
