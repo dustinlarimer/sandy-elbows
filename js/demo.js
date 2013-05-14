@@ -1,6 +1,11 @@
 var user_data = {
-	nodes: [],
-	links: []
+	nodes: [
+		{ id: 0, f: "#FBFBFB", r: 45, s: "#E5E5E5", sw: 3, weight: 0, x: 300, y: 200, fixed: true },
+		{ id: 1, f: "#FBFBFB", r: 45, s: "#E5E5E5", sw: 3, weight: 0, x: 800, y: 300, fixed: true }
+	],
+	links: [
+		{ source: 0, target: 1, fill: '#FF0000' }
+	]
 };
 
 /*
@@ -38,7 +43,7 @@ var vis = outer
   .append('svg:g')
     //.call(d3.behavior.zoom().on("zoom", rescale))
     .on("dblclick.zoom", null)
-  .append('svg:g')
+  	//.append('svg:g')
     .on("mousemove", mousemove)
     .on("mousedown", mousedown)
     .on("mouseup", mouseup);
@@ -59,9 +64,9 @@ var force = d3.layout.force()
 	.start();
 
 var nodes = force.nodes(),
-    //links = force.links(),
+    links = force.links(),
     node  = vis.selectAll(".node");
-    //link  = vis.selectAll(".link");
+    link  = vis.selectAll(".link");
 
 d3.select(window).on("keydown", keydown);
 
@@ -111,7 +116,8 @@ function mouseup() {
 				r : 45,
 				f : '#FBFBFB',
 				s : '#E5E5E5',
-				sw: 3
+				sw: 3,
+				fixed: true
 			};
 		user_data.nodes.push(node);
 		draw();
@@ -138,19 +144,23 @@ function keydown() {
 		case 46: {
 			if (selected_node) nodes.splice(nodes.indexOf(selected_node), 1);
 			selected_node = null;
+			// Update to remove related links!
       draw();
       break;
 		}
 	}
 }
 
-force.on("tick", function() {	
-  vis.selectAll("circle")
-		.attr("cx", function(d) { return d.x; })
-		.attr("cy", function(d) { return d.y; });
-});
 
 function draw() {
+	
+	var first_node = d3.select('circle')[0][0];
+	
+	link = link.data(links);
+	link.enter().insert('svg:path', 'circle')
+			.attr("class", "link")
+			.attr("fill", "transparent");
+	
 	node = node.data(nodes);
 	node.enter().append('svg:circle')
 			.attr("class", "node")
@@ -165,8 +175,16 @@ function draw() {
 	     	.ease(Math.sqrt)
 	node
 			.on("mousedown", function(d) { 
-				vis.call(d3.behavior.zoom().on("zoom", null));
+				//vis.call(d3.behavior.zoom().on("zoom", null));
 				mousedown_node = d;
+				if (selected_node && mousedown_node != selected_node) {
+					new_link = {
+						source : selected_node,
+						target : mousedown_node,
+						fill   : "#FFFF00"
+					};
+					user_data.links.push(new_link);
+				}
 				draw();
 			})
 			.on("mouseup", function(d) { 
@@ -181,10 +199,12 @@ function draw() {
       })
 			.classed("node_selected", function(d) { return d === selected_node; })
 			.exit()
-			.transition()
+			/*.transition()
 			.attr("stroke", "")
-    	.attr("r", 0)
+    	.attr("r", 0)*/
     	.remove();
+	
+	
 	
 	if (d3.event) {
     d3.event.preventDefault();
@@ -193,6 +213,27 @@ function draw() {
  	force.start();
 }
 draw();
+
+force.on("tick", function() {	
+  node
+			.attr("cx", function(d) { return d.x; })
+			.attr("cy", function(d) { return d.y; });
+	
+	link
+			.attr("d", function(d) {
+				var dx = d.target.x;
+				var dy = d.target.y;
+				var dr = Math.sqrt(dx * dx + dy * dy);
+				return "M"
+								+ d.source.x + ","
+								+ d.source.y + "A"
+								+ dr + "," + dr + " 0 0,1 "
+								+ d.target.x + ","
+								+ d.target.y;
+			}); 
+
+});
+
 
 
 $(function(){
