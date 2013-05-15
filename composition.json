@@ -1,0 +1,51 @@
+// Composition.new
+{
+	_id     : '0a',
+	owner   : User._id,  // User.new
+	members : [  // User.new from each
+		{ _id    : User._id },
+		{ _id    : User._id }
+	],
+	version : '0.0.1',
+	canvas  : {  // Canvas.new
+		height   : 600
+		width    : 900
+		fill     : '#FFFFFF'
+		type     : 'freeform'
+		// Composition.parseCanvas() ->
+		nodes    : [
+			// Node.new from each
+			{
+				_id     : 0
+				type    : 'circle',
+				radius  : 45,
+				fill    : '#FBFBFB',
+				stroke  : '#E5E5E5',
+				fixed   : true, // default
+				mask    : null || Mask._id
+				text    : {
+					content  : 'asdf...',
+					fill'    : '#000'
+				}
+			}
+		],
+		links    : [
+			// Link.new from each
+			{
+				source  : Node._id,
+				target  : Node._id,
+				fill    : '#ff0000'
+			}
+		],
+		masks    : [
+			// Mask.new from each
+			{
+				_id     : 0,
+				type    : 'square',
+				x       : 240,
+				y       : 50
+			}
+		],
+		defs     : []
+	}	
+}
